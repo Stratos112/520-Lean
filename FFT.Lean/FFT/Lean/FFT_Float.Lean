@@ -38,7 +38,6 @@ def get_odds {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
 def FFT (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
   Vector (Float × Float) (2 ^ n) :=
   let size : ℕ := 2 ^ n
-  let f0 : Float := 0.0
   if h_base : n = 0  then
     samples
   else
@@ -67,13 +66,13 @@ def FFT (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
         (R, I))
     --
     -- recombine
-    let waves_top := twiddle_odd.mapFinIdx (fun i k _ =>
+    let waves_top := twiddle_odd.mapFinIdx (fun i _ _ =>
       let R := evens[i].1 + twiddle_odd[i].1
       let I := evens[i].2 + twiddle_odd[i].2
       (R, I)
      )
     --
-    let waves_bottom := twiddle_odd.mapFinIdx (fun i k _ =>
+    let waves_bottom := twiddle_odd.mapFinIdx (fun i _ _ =>
       let R := evens[i].1 - twiddle_odd[i].1
       let I := evens[i].2 - twiddle_odd[i].2
       (R, I)

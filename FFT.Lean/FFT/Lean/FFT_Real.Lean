@@ -1,6 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import FFT.Lean.Basic_Float
-namespace Fourrier
+import FFT.Lean.Basic_Real
+namespace FourrierReal
 open Real
 
 -- A helper for getting every other element of the vector.
@@ -38,7 +38,6 @@ def get_odds {n : ℕ} (input : Vector (Real × Real) (2 ^ n)) (h : n ≥ 1)
 noncomputable def FFT (n : ℕ) (samples : Vector (Real × Real) (2 ^ n)) :
   Vector (Real × Real) (2 ^ n) :=
   let size : ℕ := 2 ^ n
-  let f0 : Real := 0
   if h_base : n = 0  then
     samples
   else
@@ -49,44 +48,46 @@ noncomputable def FFT (n : ℕ) (samples : Vector (Real × Real) (2 ^ n)) :
     let evens : Vector (Real × Real) half_size := FFT (n - 1) (get_evens samples h_gt1)
     let odds : Vector (Real × Real) half_size := FFT (n - 1) (get_odds samples h_gt1)
     -- twiddle
-    let indices : List ℕ := List.range half_size
-    let theta : List Real :=  indices.map
-      (fun k => -1 * (2 * Real.pi * ↑k) / ↑size )
-    -- k is the element, not the index
-    let twiddle : List (Real × Real) :=
-      theta.map (fun k => (cos k, sin k )) -- trying to keep the complex numbers in 2 pieces
+    -- k is the element not an index
+    let twiddle : ℕ → Real × Real :=
+      fun k => (cos (-(2 * π * k) / size), sin (-(2 * π * k) / size))
     --
     let twiddle_odd : Vector (Real × Real) half_size :=
       odds.mapFinIdx (fun i o _ =>
         -- i is index
         -- o is the odd component (1, 2)
-        let w := twiddle[i]'(by grind)
+        let w := twiddle i
         -- w is twiddle (1, 2) -- AHA!
         let R := o.1 * w.1 - o.2 * w.2
         let I := o.1 * w.2 + o.2 * w.1
         (R, I))
     --
     -- recombine
-    let waves_top := twiddle_odd.mapFinIdx (fun i k _ =>
+    let waves_top := twiddle_odd.mapFinIdx (fun i _ _ =>
       let R := evens[i].1 + twiddle_odd[i].1
       let I := evens[i].2 + twiddle_odd[i].2
       (R, I)
      )
     --
-    let waves_bottom := twiddle_odd.mapFinIdx (fun i k _ =>
+    let waves_bottom := twiddle_odd.mapFinIdx (fun i _ _ =>
       let R := evens[i].1 - twiddle_odd[i].1
       let I := evens[i].2 - twiddle_odd[i].2
       (R, I)
     )
     let waves : Vector (Real × Real) (size) :=
-      cast (by
-      rw [Nat.two_pow_pred_add_two_pow_pred h_gt1] -- this literally came from rw? --
-    ) (Vector.append waves_top waves_bottom)
-    --
+      Vector.ofFn fun (i : Fin (size)) =>
+        if h: (i.val < 2 ^ (n - 1)) then
+          waves_top[i.val]
+        else
+          have hfs : size - half_size ≤ half_size := by
+            simp only [tsub_le_iff_right]
+            rw[Nat.two_pow_pred_add_two_pow_pred]
+            omega
+          waves_bottom[i.val - 2 ^ (n - 1)]'(by omega)
     waves
     --
         -- also still need to show termination via recursion. Telling lean the lists get smaller.
     termination_by n
     decreasing_by all_goals omega
 
-end Fourrier
+end FourrierReal
