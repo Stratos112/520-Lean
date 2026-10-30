@@ -3,15 +3,6 @@ import FFT.Lean.Basic_Float
 namespace Fourrier
 open Float
 
--- Ok 3 goals:
--- 1. rewrite without pow2Nat. use n and 2 ^ n --           :)
--- 2. remove all []!                                        :)
--- 3. check the answers using DFT and the python script.  .. :(
-
---  From there, let's send it to Ewen and make sure I am on the right track,
---    before giving the new type cast for complex numbers a shot.
-
-
 -- A helper for getting every other element of the vector.
 def get_evens {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
 : Vector (Float × Float) (2^(n - 1)):=
@@ -70,7 +61,7 @@ def FFT (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
         -- i is index
         -- o is the odd component (1, 2)
         let w := twiddle[i]'(by grind)
-        -- w is twiddle (1, 2) -- AHA! 
+        -- w is twiddle (1, 2) -- AHA!
         let R := o.1 * w.1 - o.2 * w.2
         let I := o.1 * w.2 + o.2 * w.1
         (R, I))
