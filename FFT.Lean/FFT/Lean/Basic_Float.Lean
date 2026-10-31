@@ -1,5 +1,5 @@
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-namespace Fourrier
+namespace Fourier
 open Float
 
 -- The inner most loop
@@ -36,7 +36,7 @@ def per_reference (k : Float) (size : ℕ) (samples : Vector Float (size)) : (Fl
 -- alpha is the type of the values in the sample vector
 -- size is the length of the sample vector
 -- v is the vector of samples
-def DFT (size : ℕ) (samples : Vector Float (size)) : Vector (Float × Float) (size) :=
+def DFT_float (size : ℕ) (samples : Vector Float (size)) : Vector (Float × Float) (size) :=
   -- we will make the references vector based on the length of the input s
   let references : Vector Float size := (Vector.range size).map Nat.toFloat
   -- for each reference, use per per_reference to sum along all the samples
@@ -45,17 +45,17 @@ def DFT (size : ℕ) (samples : Vector Float (size)) : Vector (Float × Float) (
 references.map (fun k => per_reference k size samples )
 
 
-#eval DFT 4 (#v[1, 1, 1, 1]) -- expect 4, 0, 0 ,0
-#eval DFT 4 (#v[1, 2, 3, 4]) -- expect 10, (-2 0) (-2 0) (-2 0) -- Wrong??
-#eval DFT 8 (#v[1, 2, 1, 2, 1, 2, 1, 2]) --expect (12,0) (0,0), (0,0) (0,0) (-4,0), (0,0) (0,0) (0,0)
-#eval DFT 8 (#v[2, 1, 0, 1, 2, 1, 0, 1]) -- expect (8,0), 0, (4,0), 0 ,0 ,0 ,(4,0), 0
+#eval DFT_float 4 (#v[1, 1, 1, 1]) -- expect 4, 0, 0 ,0
+#eval DFT_float 4 (#v[1, 2, 3, 4]) -- expect 10, (-2 0) (-2 0) (-2 0) -- Wrong??
+#eval DFT_float 8 (#v[1, 2, 1, 2, 1, 2, 1, 2]) --expect (12,0) (0,0), (0,0) (0,0) (-4,0), (0,0) (0,0) (0,0)
+#eval DFT_float 8 (#v[2, 1, 0, 1, 2, 1, 0, 1]) -- expect (8,0), 0, (4,0), 0 ,0 ,0 ,(4,0), 0
 
-#eval DFT 8 (#v[0, 1, 2, 1, 0, 1, 2, 1])
+#eval DFT_float 8 (#v[0, 1, 2, 1, 0, 1, 2, 1])
 -- expect [(8.0, 0.0), (0.0, 0.0), (-4.0, 0.0), (-0.0, -0.0), (0.0, -0.0), (0.0, 0.0),
 --         (-4.0, 0.0), (-0.0, 0.0)]
 
-#eval DFT 12 (#v[2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0])
+#eval DFT_float 12 (#v[2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0])
 -- expect [(0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (12.0, 0.0), (0.0, 0.0), (0.0, 0.0),
 --         (0.0, 0.0), (12.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0)]
 
-end Fourrier
+end Fourier

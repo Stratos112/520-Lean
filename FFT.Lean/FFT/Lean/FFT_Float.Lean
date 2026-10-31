@@ -1,6 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import FFT.Lean.Basic_Float
-namespace Fourrier
+namespace Fourier
 open Float
 
 -- A helper for getting every other element of the vector.
@@ -35,7 +35,7 @@ def get_odds {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
   -- return waves
 
 --here we go
-def FFT (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
+def FFT_float (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
   Vector (Float × Float) (2 ^ n) :=
   let size : ℕ := 2 ^ n
   if h_base : n = 0  then
@@ -45,8 +45,8 @@ def FFT (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
     have h_gt1 : n ≥ 1 := by omega
     -- recursion
     let half_size : ℕ := (2 ^ (n - 1))
-    let evens : Vector (Float × Float) half_size := FFT (n - 1) (get_evens samples h_gt1)
-    let odds : Vector (Float × Float) half_size := FFT (n - 1) (get_odds samples h_gt1)
+    let evens : Vector (Float × Float) half_size := FFT_float (n - 1) (get_evens samples h_gt1)
+    let odds : Vector (Float × Float) half_size := FFT_float (n - 1) (get_odds samples h_gt1)
     -- twiddle
     let indices : List ℕ := List.range half_size
     let theta : List Float :=  indices.map
@@ -93,26 +93,26 @@ def close (ε : Float) (xs ys : List (Float × Float)) : Bool :=
     (a.1 - b.1).abs ≤ ε && (a.2 - b.2).abs ≤ ε
 def ε : Float := 1e-9
 
-#eval FFT 2 (#v[(1,0), (1,0), (1,0), (1,0)])-- expect 4, 0, 0 ,0
-#guard FFT 2 (#v[(1,0), (1,0), (1,0), (1,0)]) = #v[(4.0, 0.0), (0,0), (0,0), (0,0)]
-#guard close ε (FFT 2 (#v[(1,0), (1,0), (1,0), (1,0)])).toList (DFT 4 (#v[1, 1, 1, 1])).toList
+#eval FFT_float 2 (#v[(1,0), (1,0), (1,0), (1,0)])-- expect 4, 0, 0 ,0
+#guard FFT_float 2 (#v[(1,0), (1,0), (1,0), (1,0)]) = #v[(4.0, 0.0), (0,0), (0,0), (0,0)]
+#guard close ε (FFT_float 2 (#v[(1,0), (1,0), (1,0), (1,0)])).toList (DFT_float 4 (#v[1, 1, 1, 1])).toList
 
-#eval FFT 2 (#v[(1,0), (2,0), (3,0), (4,0)]) -- expect (10,0), (-2 2) (-2 0) (-2 -2) -- Wrong?
-#guard close ε (FFT 2 (#v[(1,0), (2,0), (3,0), (4,0)])).toList (DFT 4 (#v[1, 2, 3, 4])).toList
+#eval FFT_float 2 (#v[(1,0), (2,0), (3,0), (4,0)]) -- expect (10,0), (-2 2) (-2 0) (-2 -2) -- Wrong?
+#guard close ε (FFT_float 2 (#v[(1,0), (2,0), (3,0), (4,0)])).toList (DFT_float 4 (#v[1, 2, 3, 4])).toList
 
-#eval FFT 3 (#v[(1,0), (2,0), (1,0), (2,0), (1,0), (2,0), (1,0), (2,0)])
+#eval FFT_float 3 (#v[(1,0), (2,0), (1,0), (2,0), (1,0), (2,0), (1,0), (2,0)])
 --expect (12,0) (0,0), (0,0) (0,0) (-4,0), (0,0) (0,0) (0,0)
-#guard close ε (FFT 3 (#v[(1,0), (2,0), (1,0), (2,0), (1,0), (2,0), (1,0), (2,0)])).toList (DFT 8 (#v[1, 2, 1, 2, 1, 2, 1, 2])).toList
+#guard close ε (FFT_float 3 (#v[(1,0), (2,0), (1,0), (2,0), (1,0), (2,0), (1,0), (2,0)])).toList (DFT_float 8 (#v[1, 2, 1, 2, 1, 2, 1, 2])).toList
 
-#eval FFT 3 (#v[(2,0), (1,0), (0,0), (1,0), (2,0), (1,0), (0,0), (1,0)])
+#eval FFT_float 3 (#v[(2,0), (1,0), (0,0), (1,0), (2,0), (1,0), (0,0), (1,0)])
 -- expect (8,0), 0, (4,0), 0 ,0 ,0 ,(4,0), 0
-#guard close ε (FFT 3 (#v[(2,0), (1,0), (0,0), (1,0), (2,0), (1,0), (0,0), (1,0)])).toList (DFT 8 (#v[2, 1, 0, 1, 2, 1, 0, 1])).toList
+#guard close ε (FFT_float 3 (#v[(2,0), (1,0), (0,0), (1,0), (2,0), (1,0), (0,0), (1,0)])).toList (DFT_float 8 (#v[2, 1, 0, 1, 2, 1, 0, 1])).toList
 
 
-#eval FFT 3 (#v[(0,0), (1,0), (2,0), (1,0), (0,0), (1,0), (2,0), (1,0)])
+#eval FFT_float 3 (#v[(0,0), (1,0), (2,0), (1,0), (0,0), (1,0), (2,0), (1,0)])
 -- expect [(8.0, 0.0), (0.0, 0.0), (-4.0, 0.0), (-0.0, -0.0), (0.0, -0.0), (0.0, 0.0),
 --         (-4.0, 0.0), (-0.0, 0.0)]
-#guard close ε (FFT 3 (#v[(0,0), (1,0), (2,0), (1,0), (0,0), (1,0), (2,0), (1,0)])).toList (DFT 8 (#v[0, 1, 2, 1, 0, 1, 2, 1])).toList
+#guard close ε (FFT_float 3 (#v[(0,0), (1,0), (2,0), (1,0), (0,0), (1,0), (2,0), (1,0)])).toList (DFT_float 8 (#v[0, 1, 2, 1, 0, 1, 2, 1])).toList
 
 
 -- NOT POW 2
@@ -120,4 +120,4 @@ def ε : Float := 1e-9
 -- expect [(0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0), (12.0, 0.0), (0.0, 0.0), (0.0, 0.0),
 --         (0.0, 0.0), (12.0, 0.0), (0.0, 0.0), (0.0, 0.0), (0.0, 0.0)]
 
-end Fourrier
+end Fourier

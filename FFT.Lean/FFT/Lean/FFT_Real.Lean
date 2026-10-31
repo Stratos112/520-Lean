@@ -1,6 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import FFT.Lean.Basic_Real
-namespace FourrierReal
+namespace Fourier
 open Real
 
 -- A helper for getting every other element of the vector.
@@ -90,4 +90,4 @@ noncomputable def FFT (n : ℕ) (samples : Vector (Real × Real) (2 ^ n)) :
     termination_by n
     decreasing_by all_goals omega
 
-end FourrierReal
+end Fourier
