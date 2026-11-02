@@ -7,7 +7,12 @@ import Mathlib.Data.Nat.Cast.Field
 namespace Fourier
 
 -- ok so the issue here is just using sin and cos instead of e^-2pi like I did on paper.
+-- Or to translate them.
 -- Which is actually good because it will force me to improve my understanding of the relationship.
+
+-- Addendum, and idk if this was Ewens suggestion or both, but I'm going to refactor this to use
+-- Complex.exp (base e). The old code can still be found at "FFT_Real_Old" and "Basic_Real_old"
+
 
 -- DEFINITIONS --
 
@@ -155,98 +160,5 @@ lemma split_lemma (f : ℕ → ℂ) (K : ℕ) :
       rw [Finset.sum_range_succ]
       grind
 
-
--- this is the butterfly lemma
-lemma lemma_6 (k : ℕ) (hk : k < N n) :
-    (E_fun n S hn' k) + ω (N n) ^ k * (O_fun n S hn' k) = (DFT (N n) S)[k]'hk := by
-  unfold DFT per_reference per_sample
-  rw [@Vector.getElem_ofFn]
-  rw [← @Fin.sum_univ_def]
-  unfold E_fun O_fun
-  -- Ok everything is in math notation
-  let x : ℕ → ℂ := fun j => if h : j < N n then S[j] else 0
-  have hR : ∑ j : Fin (N n), S[j] * ω (N n) ^ (j.val * k)
-    = ∑ j ∈ Finset.range (N n), x j * ω (N n) ^ (j * k) := by
-    rw [← Fin.sum_univ_eq_sum_range (fun j => x j * ω (N n) ^ (j * k))]
-    apply Finset.sum_congr rfl
-    intro j _
-    simp [x]
-  have hR2 : ∑ j ∈ Finset.range (2 * M n), x j * ω (N n) ^ (j * k)
-    = ∑ j ∈ Finset.range (N n), x j * ω (N n) ^ (j * k) := by rw [← lemma_m2 n hn']
-  conv => {
-    rhs
-    simp only [Fin.val_mk]
-    rw [hR]
-    rw [← hR2]
-    rw [split_lemma] -- omg that was way too hard lol
-  }
-  -- So now we set about on a journey to try and rearrange the power terms which are inside the sum
-  -- ok so fin them to range
-  have hE : ∑ l : Fin (M n), (E n S hn')[l] * ω (M n) ^ (↑l * k)
-    = ∑ l ∈ Finset.range (M n), x (2 * l) * ω (M n) ^ (l * k) := by
-    rw [← Fin.sum_univ_eq_sum_range (fun j => x (2 * j) * ω (M n) ^ (j * k)) (M n)]
-    apply Finset.sum_congr rfl
-    intro m _
-    congr
-    unfold E get_evens
-    have hl : 2 * m.val < N n := by
-      have := m.isLt
-      have := lemma_m2 n hn'
-      omega
-    simp [x]
-    simp [hl]
-    rfl
-  have hO : ∑ l : Fin (M n), (O n S hn')[l] * ω (M n) ^ (↑l * k)
-    = ∑ l ∈ Finset.range (M n), x (2 * l + 1) * ω (M n) ^ (l * k) := by
-    rw [← Fin.sum_univ_eq_sum_range (fun j => x (2 * j + 1) * ω (M n) ^ (j * k)) (M n)]
-    apply Finset.sum_congr rfl
-    intro m _
-    congr
-    unfold O get_odds
-    have hl : 2 * m.val + 1< N n := by
-      have := m.isLt
-      have := lemma_m2 n hn'
-      omega
-    simp [x]
-    simp [hl]
-    rfl
-  -- Sorry, I should have factored these out.
-  -- Idk if this could have been made easier by somehow casting them?
-  -- I guess i'm less than confident in the difference between fin, finset, sum and range because ??
-  -- But we're using finsets now
-  rw [hE, hO]
-  rw [Finset.mul_sum]
-  rw [← Finset.sum_add_distrib]
-  apply Finset.sum_congr rfl
-  -- Hey now its looking pretty good
-  intro m _
-  rw [lemma_3 n hn']
-  rw [← pow_mul]
-  conv => {lhs; arg 2; rw [← mul_assoc]}
-  rw [mul_assoc 2 m k]
-  rw [add_mul]
-  rw [one_mul]
-  rw [pow_add]
-  rw [mul_assoc 2 m k]
-  congr 1
-  -- omg I guess il;l just spoon feed you everything lean
-  rw [mul_comm (ω (N n) ^ k) (x (2 * m + 1))]
-  rw [mul_assoc]
-  rw [mul_comm (ω (N n) ^ k)]
-  --by rfl. but it did it automatically? cool ig.
-
-
--- The bottom half. Essentially reusing the rest of this stuff. 
-lemma lemma_7
-
--- THE FINAL BOSS --
-
-theorem FFT_correct (n : ℕ) (S : Vector ℂ (2 ^ n)) :
-  (FFT n S) = (DFT (2 ^ n) S) := by
-  unfold FFT DFT per_reference per_sample
-
-    induction K with
-    | zero => sorry
-    | succ K ih => sorry
-
+ -- Cont'd in the 'Correct_Proof' file
 end Fourier
