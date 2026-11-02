@@ -4,7 +4,7 @@ namespace Fourier
 open Float
 
 -- A helper for getting every other element of the vector.
-def get_evens {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
+def get_evens_f {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
 : Vector (Float × Float) (2^(n - 1)):=
   Vector.ofFn fun (i : Fin (2 ^ (n - 1))) => input[2 * i.val]'(by
     have h1 : i.val < 2 ^ (n - 1) := i.isLt
@@ -13,7 +13,7 @@ def get_evens {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
       omega
     omega)
 -- And for odds.
-def get_odds {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
+def get_odds_f {n : ℕ} (input : Vector (Float × Float) (2 ^ n)) (h : n ≥ 1)
 : Vector (Float × Float) (2^(n - 1)):=
   Vector.ofFn fun (i : Fin (2 ^ (n - 1))) => input[2 * i.val + 1]'(by
     have h1 : i.val < 2 ^ (n - 1) := i.isLt
@@ -45,8 +45,8 @@ def FFT_float (n : ℕ) (samples : Vector (Float × Float) (2 ^ n)) :
     have h_gt1 : n ≥ 1 := by omega
     -- recursion
     let half_size : ℕ := (2 ^ (n - 1))
-    let evens : Vector (Float × Float) half_size := FFT_float (n - 1) (get_evens samples h_gt1)
-    let odds : Vector (Float × Float) half_size := FFT_float (n - 1) (get_odds samples h_gt1)
+    let evens : Vector (Float × Float) half_size := FFT_float (n - 1) (get_evens_f samples h_gt1)
+    let odds : Vector (Float × Float) half_size := FFT_float (n - 1) (get_odds_f samples h_gt1)
     -- twiddle
     let indices : List ℕ := List.range half_size
     let theta : List Float :=  indices.map
